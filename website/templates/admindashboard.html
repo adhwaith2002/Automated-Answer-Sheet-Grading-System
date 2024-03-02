@@ -1,0 +1,233 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+  integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+  crossorigin="anonymous"
+/>
+<link
+rel="stylesheet"
+href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+crossorigin="anonymous"
+/>
+<link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+    <title>Admin dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'style.css') }}">
+
+    <style>
+        *{
+            font-family: sans-serif;
+        }
+        .content-table {
+            border-collapse: collapse;
+            margin: 28px 0;
+            font-size: 1.8em;
+            min-width: 500px;
+            border-radius: 5px 5px 0 0;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .content-table tr th {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: left;
+            font-weight: bold;
+        }
+        .content-table th,
+.content-table td {
+    padding: 12px 15px;
+}
+.content-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+} 
+.content-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+} 
+.content-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+     
+    </style>  
+    
+  </head>
+  <body>
+    
+    <div class="area">
+       
+       <center> <h1>Hi  admin {{current_user.uname}} </h1> <br>
+
+        <table class="content-table">
+            <tr>
+                <th>Name</th>
+                <td>{{current_user.uname}}</td>
+            </tr>
+            <tr>
+                <th>Date of birth</th>
+                <td>{{current_user.dob.date()}}</td>
+            </tr>    
+            <tr>
+                <th>Sex</th>
+                <td>{{current_user.sex}}</td>
+            </tr>
+            <tr>
+                <th>Blood group</th>
+                <td>{{current_user.bloodgroup}}</td>
+            </tr> 
+            <tr>
+                <th>Address</th>
+                <td>{{current_user.address}}</td>
+            </tr>
+            <tr>
+                <th>City</th>
+                <td>{{current_user.city}}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{current_user.email}}</td>
+            </tr>
+            <tr>
+                <th>Contact</th>
+                <td>{{current_user.contact}}</td>
+            </tr>                                     
+        </table>
+
+     
+    </div><nav class="main-menu">
+        
+            <ul>
+                <li>
+                    <a href="#">
+                        <i class="fa fa-home fa-2x"></i>
+                        <span class="nav-text">
+                           Detail
+                        </span>
+                    </a>
+                  
+                </li>
+                
+               <li class="has-subnav">
+                    <a href="{{url_for('views.admineditdashboard')}}">
+                        <i class="fa fa-edit fa-2x"></i>
+                        <span class="nav-text">
+                            Edit donors
+                        </span>
+                    </a>
+                    
+                </li>
+                <li class="has-subnav">
+                    <a href="{{url_for('views.changeadminpassword')}}">
+                       <i class="fa fa-lock fa-2x"></i>
+                        <span class="nav-text">
+                            Change password
+                        </span>
+                    </a>
+                    
+                </li>
+                
+                <li class="has-subnav">
+                    <a href="{{url_for('views.addadmin')}}">
+                       <i class="fa fa-user-plus fa-2x"></i>
+                        <span class="nav-text">
+                            Add admins
+                        </span>
+                    </a>
+                    
+                </li>
+                
+
+                <li class="has-subnav">
+                    <a href="#">
+                       <i class="fa fa-check fa-2x"></i>
+                        <span class="nav-text">
+                            Verify health certificate
+                        </span>
+                    </a>
+                    
+                </li>
+                <!--li class="has-subnav">
+                    <a href="#">
+                       <i class="fa fa-tint fa-2x"></i>
+                        <span class="nav-text">
+                            Last donation date
+                        </span>
+                    </a>
+                   
+                </li-->
+                <!--li>
+                    <a href="#">
+                        <i class="fa fa-film fa-2x"></i>
+                        <span class="nav-text">
+                            Surveying Tutorials
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fa fa-book fa-2x"></i>
+                        <span class="nav-text">
+                           Surveying Jobs
+                        </span>
+                    </a>
+                </li>
+                <li>
+                   <a href="#">
+                       <i class="fa fa-cogs fa-2x"></i>
+                        <span class="nav-text">
+                            Tools & Resources
+                        </span>
+                    </a>
+                </li>
+                <li>
+                   <a href="#">
+                        <i class="fa fa-map-marker fa-2x"></i>
+                        <span class="nav-text">
+                            Member Map
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                       <i class="fa fa-info fa-2x"></i>
+                        <span class="nav-text">
+                            Documentation
+                        </span>
+                    </a>
+                </li-->
+            </ul>
+            
+            <ul class="logout">
+                <li>
+                   <a href="{{url_for('auth.logout')}}">
+                         <i class="fa fa-power-off fa-2x"></i>
+                        <span class="nav-text">
+                            Logout
+                        </span>
+                    </a>
+                </li>  
+            </ul>
+            
+        </nav>
+        
+        <script
+        src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"
+      ></script>
+      <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"
+      ></script>
+      <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+   
+         
+</body>
+    </html>
