@@ -4,6 +4,8 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
 
+ 
+
 class Student(db.Model,UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     Studentname = db.Column(db.String(200), nullable=False)

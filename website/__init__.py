@@ -41,6 +41,16 @@ def create_app():
     
         user = Student.query.get(int(id))
         return user
+
+    # @login_manager.user_loader
+    # def load_user(user_id):
+    #     user_type, user_id = user_id.split('_')  # Split the prefixed id
+    #     user_id = int(user_id)  # Convert the id back to an integer
+    #     if user_type == 'Student':
+    #         return Student.query.get(user_id)
+    #     elif user_type == 'Teacher':
+    #         return Teacher.query.get(user_id)
+    #     return None
      
     return app
 

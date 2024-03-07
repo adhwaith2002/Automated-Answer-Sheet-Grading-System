@@ -21,52 +21,92 @@ crossorigin="anonymous"
   <body>
     
     <div class="area">
-        <center>
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if
-            messages %} {% for category, message in messages %} {% if category ==
-            'error' %}
-            <div class="alert alert-danger alter-dismissable fade show" role="alert">
-              {{ message }}
-              <button type="button" class="close" data-dismiss="alert">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            {% else %}
-            <div class="alert alert-success alter-dismissable fade show" role="alert">
-              {{ message }}
-              <button type="button" class="close" data-dismiss="alert">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            {% endif %} {% endfor %} {% endif %} {% endwith %}
-            </center>
+        
         <div class="container">
             <div class="container">
                 <div class="container">
-
-                    <form action = '/teacherchangepassword' method= 'POST'> 
-                        <div class="form-group">
-                            
-                            <input type="email" class="form-control" id="email"
-                                placeholder="Enter Email" name="email" value="{{current_user.Email}}" hidden>
-                        </div>  
-                        <div class="form-group"> 
-                            <label for="teacherpassword">Password</label> 
-                            <input type="password" class="form-control" id="teacherpassword" placeholder="Enter the new password" name="teacherpassword"> 
-                        </div> 
-                        <div class="form-group"> 
-                            <label for="password">Confirm Password</label> 
-                            <input type="password" class="form-control" id="teacherpassword1" placeholder="Confirm new Password" name="teacherpassword1"> 
-                        </div>
-
-                        <button type="submit" class="btn bg-success"> Update </button>
-                     </form>     
+            
+        <form action = '/studenteditdashboard' method= 'POST'>
+            <div class="form-group">
+                <label for="username">Name</label>
+                <input type="text" class="form-control" id="studentname"
+                    placeholder="Enter User Name" name="studentname" value="{{current_user.Studentname}}">
+            </div>
+            <div class="form-group">
+               
+                <input type="email" class="form-control" id="studentemail"
+                    placeholder = "Enter the Email" name="studentemail" value="{{current_user.email}}" hidden> 
+            </div>
+            <div class="form-group">
+                        <label for="regnumber">Register Number</label>
+                        <input type="text" class="form-control" id="regnumber"
+                            placeholder="Enter Register number" name="regnumber" value="{{current_user.register_number}}">
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of birth</label>
+                <input type="date" class="form-control" id="studentdob"
+                    placeholder = "Enter the Date of birth" name="studentdob" value="{{current_user.dob.date()}}">
+            </div> 
+            <div class="form-group">
+            <label for="sex" >Sex</label> 
+            <select for="studentsex" class="form-control" name="studentsex" >
+        <option value="{{current_user.sex}}" class="form-control" >{{current_user.sex}}  
+        </option>  
+        <option value = "male" class="form-control"> Male   
+        </option>  
+        <option value = "female" class="form-control"> Female  
+        </option>  
+        <option value = "others" class="form-control"> others
+        </option>  
+    </select>    
+    </div> 
+        <div class="form-group">
+            <label for="semester" >Semester</label> 
+            <select for="semester" class="form-control" name="semester" >
+        <option value="{{current_user.semester}}" class="form-control" >{{current_user.semester}}  
+        </option>  
+        <option value = "S1" class="form-control"> S1  
+        </option>  
+        <option value = "S2" class="form-control"> S2
+        </option>  
+        <option value = "S3" class="form-control"> S3
+        </option> 
+        <option value = "S4" class="form-control"> S4
+        </option> 
+        <option value = "S5" class="form-control"> S5
+        </option> 
+        <option value = "S6" class="form-control"> S6
+        </option> 
+        <option value = "S7" class="form-control"> S7
+        </option> 
+        <option value = "S8" class="form-control"> S8
+        </option> 
+    </div> 
+</select>  
+          <div class="form-group">
+            <label for="department" >Department</label> 
+            <select for="studentdepartment" class="form-control" name="studentdepartment" >
+        <option value="{{current_user.department}}" class="form-control" >{{current_user.department}} 
+        </option>  
+        <option value="IT" class="form-control">Information Technology (IT)</option>
+        <option value="CSE" class="form-control">Computer Science(CSE)</option>
+        <option value="EEE" class="form-control">Electrical Engineering (EEE)</option>
+        <option value="ME" class="form-control">Mechanical Engineering (ME)</option>
+        <option value="ECE" class="form-control">Electronics and Communication Engineering (ECE)</option>
+        <option value="CE" class="form-control">Civil Engineering (CE)</option> 
+          </select> <br>
+        <button type="submit" class="btn bg-success">
+                Update
+            </button>
+        </form>
+        </div>
+        
        
     </div><nav class="main-menu">
         
             <ul>
                 <li>
-                    <a href="{{url_for('views.teacherdashboard')}}">
+                    <a href="{{url_for('views.studentdashboard')}}">
                         <i class="fa fa-home fa-2x"></i>
                         <span class="nav-text">
                            Home
@@ -76,7 +116,7 @@ crossorigin="anonymous"
                 </li>
                 
                <li class="has-subnav">
-                    <a href="{{url_for('views.teachereditdashboard')}}">
+                    <a href="#">
                         <i class="fa fa-edit fa-2x"></i>
                         <span class="nav-text">
                             Edit details
@@ -85,7 +125,7 @@ crossorigin="anonymous"
                     
                 </li>
                 <li class="has-subnav">
-                    <a href="#">
+                    <a href="{{url_for('views.studentchangepassword')}}">
                        <i class="fa fa-lock fa-2x"></i>
                         <span class="nav-text">
                             Change password
@@ -93,24 +133,7 @@ crossorigin="anonymous"
                     </a>
                     
                 </li>
-                <li class="has-subnav">
-                    <a href="{{url_for('views.studentverification')}}">
-                       <i class="fa fa-user fa-2x"></i>
-                        <span class="nav-text">
-                            Student Verification
-                        </span>
-                    </a>
-                    
-                </li>
-                <li class="has-subnav">
-                    <a href="{{url_for('views.uploadanswersheet')}}">
-                       <i class="fa fa-upload fa-2x"></i>
-                        <span class="nav-text">
-                            Upload answer sheet
-                        </span>
-                    </a>
-                   
-                </li>
+                
                 <!--li>
                     <a href="#">
                         <i class="fa fa-film fa-2x"></i>
@@ -152,7 +175,7 @@ crossorigin="anonymous"
                     </a>
                 </li-->
             </ul>
-            
+
             <ul class="logout">
                 <li>
                    <a href="{{url_for('auth.teacherlogout')}}">
@@ -163,8 +186,9 @@ crossorigin="anonymous"
                     </a>
                 </li>  
             </ul>
-            
         </nav>
+
+        
         
         <script
         src="https://code.jquery.com/jquery-3.2.1.slim.min.js"

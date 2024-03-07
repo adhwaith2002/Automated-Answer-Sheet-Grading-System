@@ -7,8 +7,71 @@ import datetime
 from website.models import Student,Teacher
 from website import db
 from flask_login import  login_required , current_user
+import google.generativeai as genai
+import PIL.Image
+import os
+import shutil
+from PIL import Image
+from werkzeug.utils import secure_filename
+from pdf2image import convert_from_path
+import fitz
 
 views = Blueprint('views',__name__)
+
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+image_path = os.path.join(os.getcwd(), 'answer.jpeg')
+
+genai.configure(api_key="AIzaSyDMkylfV_O9Tpd7cELHZ_G4hx3dMg3A4tU")
+model = genai.GenerativeModel('gemini-pro-vision')
+def get_file_extension(filename):
+    return os.path.splitext(filename)[1].lower()
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def clear_upload_folder():
+    folder_path = os.path.join(os.getcwd(), UPLOAD_FOLDER)
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
+def clear_upload_folder1(folder_path):
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
+def convert_pdf_to_jpg(pdf_path, output_folder):
+    try:
+        clear_upload_folder1(output_folder)
+        
+        pdf_document = fitz.open(pdf_path)
+
+      
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+
+        for page_number in range(pdf_document.page_count):
+            page = pdf_document[page_number]
+            image = page.get_pixmap()
+            image.save(os.path.join(output_folder, f"converted_page_{page_number + 1}.png"))
+        pdf_document.close()
+        
+        print(f"PDF converted to JPG and saved in '{output_folder}'")
+        return True
+    except Exception as e:
+        print(f"Error converting PDF to JPG: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 
 @views.route('/')
@@ -39,6 +102,28 @@ def teachereditdashboard():
 
     return render_template('teachereditdashboard.html',user=current_user)
 
+@views.route('/studenteditdashboard',methods=['GET','POST'])
+@login_required
+def studenteditdashboard():
+    if request.method == 'POST':
+        teachername = request.form.get("teachername")
+        teacheremail = request.form.get("teacheremail")
+        teacherdob = request.form.get("teacherdob")
+        teacherdob1 = datetime.datetime.strptime(teacherdob, "%Y-%m-%d")
+        teachersex =request.form.get("teachersex")
+        teacherdepartment = request.form.get("teacherdepartment")
+
+        teacher = Teacher.query.filter_by(Email=teacheremail).first()
+        teacher.Teachername=teachername
+        teacher.Email=teacheremail
+        teacher.dob=teacherdob1
+        teacher.sex=teachersex
+        teacher.department =teacherdepartment
+
+        db.session.commit() 
+
+    return render_template('studenteditdashboard.html',user=current_user)
+
 @views.route('/studentdashboard')
 @login_required
 def studentdashboard():
@@ -55,6 +140,67 @@ def studentverification():
 @login_required
 def teacherdashboard():
     return render_template('teacherdashboard.html',user=current_user)
+
+@views.route('/uploadanswersheet')
+@login_required
+def uploadanswersheet():
+    if request.method == 'POST':
+
+        # Check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+
+        file = request.files['file']
+
+        # If the user does not select a file, the browser submits an empty file without a filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+
+        # If the file is allowed and has a valid extension
+        if file and allowed_file(file.filename):
+            # Secure the filename
+            
+
+            
+            file_extension = get_file_extension(file.filename)
+            unique_filename = "AnswerSheet" + file_extension
+            filename = secure_filename(unique_filename)
+
+            clear_upload_folder()
+
+            filepath = os.path.join(UPLOAD_FOLDER,filename)
+
+            if os.path.exists(filepath):
+                os.remove(filepath)
+
+            file.save(filepath)
+            flash ("uploaded sucessfully")
+
+            pdf_filename = "AnswerSheet.pdf"
+            pdf_path = os.path.join(UPLOAD_FOLDER, pdf_filename)
+            output_folder = os.path.join(os.getcwd(), 'converted')
+            if os.path.exists(pdf_path):
+                success = convert_pdf_to_jpg(pdf_path, output_folder)
+            if success:
+                flash("PDF converted to JPG successfully.")
+            else:
+                flash("Error converting PDF to JPG. Please check the logs for details.")
+            
+            converted_folder = os.path.join(os.getcwd(), 'converted')
+            for filename in os.listdir(converted_folder):
+                if filename.endswith('.png'):
+                    image_path = os.path.join(converted_folder, filename)
+                    img = Image.open(image_path)
+                    response = model.generate_content(["convert hand written to text ", img])
+                    candidates = response.candidates
+                    for candidate in candidates:
+                        content_parts = candidate.content.parts
+                        for part in content_parts:
+                            flash(part.text)
+            return redirect(url_for('views.uploadanswersheet'))
+    return render_template('uploadanswersheet.html',user=current_user)
 
 @views.route('/admindashboard')
 @login_required
@@ -168,6 +314,23 @@ def teacherchangepassword():
             flash('passwords don\'t match', category='error')
 
     return render_template('teacherchangepassword.html',user=current_user)
+
+@views.route('/studentchangepassword',methods=['GET','POST'])
+@login_required
+def studentchangepassword():
+    if request.method == 'POST':
+        teacherpassword = request.form.get("teacherpassword")
+        teacherpassword1 = request.form.get("teacherpassword1")
+        if(teacherpassword == teacherpassword1):
+            email = request.form.get("email")
+            teacher = Teacher.query.filter_by(Email=email).first()
+            teacher.password=teacherpassword
+            db.session.commit()
+            flash('password updated successfully', category='sucess')
+        else:
+            flash('passwords don\'t match', category='error')
+
+    return render_template('studentchangepassword.html',user=current_user)
 
 @views.route('/<int:id>/lastdonationdate',methods=['GET','POST'])
 @login_required
