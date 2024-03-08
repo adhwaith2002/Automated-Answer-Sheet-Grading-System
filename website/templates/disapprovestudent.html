@@ -14,66 +14,28 @@ href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min
 crossorigin="anonymous"
 />
 <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
-    <title>Dashboard</title>
+    <title>approve</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'style.css') }}">
- 
-  </head>
+
+</head>
   <body>
+
     
     <div class="area">
-        
-        <div class="container">
-            <div class="container">
-                <div class="container">
-            
-        <form action = '/teachereditdashboard' method= 'POST'>
-            <div class="form-group">
-                <label for="username">Name</label>
-                <input type="text" class="form-control" id="teachername"
-                    placeholder="Enter User Name" name="teachername" value="{{current_user.name}}">
+        <div class="container d-flex justify-content-center">
+            <div class="card" style="width: 18rem; margin-top: 20px;">
+                <div class="card-body">
+                    <h5 class="card-title">Deny User</h5>
+                    <p class="card-text">Click yes to Approve</p>
+                    <form action="/{{student.id}}/disapprovestudent" method="post">
+                        <input type="submit" value="YES" class="btn btn-outline-danger">
+                        <a href="{{url_for('views.studentverification')}}" class="btn btn-outline-warning">Cancel</a>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-               
-                <input type="email" class="form-control" id="teacheremail"
-                    placeholder = "Enter the Email" name="teacheremail" value="{{current_user.email}}" hidden> 
-            <div class="form-group">
-                <label for="dob">Date of birth</label>
-                <input type="date" class="form-control" id="teacherdob"
-                    placeholder = "Enter the Date of birth" name="teacherdob" value="{{current_user.dob.date()}}">
-            </div> 
-            <div class="form-group">
-            <label for="sex" >Sex</label> 
-            <select for="teachersex" class="form-control" name="teachersex" >
-        <option value="{{current_user.sex}}" class="form-control" >{{current_user.sex}}  
-        </option>  
-        <option value = "Male" class="form-control"> Male   
-        </option>  
-        <option value = "Female" class="form-control"> Female  
-        </option>  
-        <option value = "others" class="form-control"> others
-        </option>  
-          </select>      
-          <div class="form-group">
-            <label for="department" >Department</label> 
-            <select for="teacherdepartment" class="form-control" name="teacherdepartment" >
-        <option value="{{current_user.department}}" class="form-control" >{{current_user.department}} 
-        </option>  
-        <option value="IT" class="form-control">Information Technology (IT)</option>
-        <option value="CSE" class="form-control">Computer Science(CSE)</option>
-        <option value="EEE" class="form-control">Electrical Engineering (EEE)</option>
-        <option value="ME" class="form-control">Mechanical Engineering (ME)</option>
-        <option value="ECE" class="form-control">Electronics and Communication Engineering (ECE)</option>
-        <option value="CE" class="form-control">Civil Engineering (CE)</option> 
-          </select> <br>
-        <button type="submit" class="btn bg-success">
-                Update
-            </button>
-        </form>
         </div>
-        </div>
-        </div>
-       
-    </div><nav class="main-menu">
+    </div>
+       </div><nav class="main-menu">
         
             <ul>
                 <li>
@@ -87,7 +49,7 @@ crossorigin="anonymous"
                 </li>
                 
                <li class="has-subnav">
-                    <a href="#">
+                    <a href="{{url_for('views.teachereditdashboard')}}">
                         <i class="fa fa-edit fa-2x"></i>
                         <span class="nav-text">
                             Edit details
@@ -111,7 +73,6 @@ crossorigin="anonymous"
                             Student Verification
                         </span>
                     </a>
-                    
                 </li>
                 <li class="has-subnav">
                     <a href="{{url_for('views.uploadanswersheet')}}">
@@ -120,8 +81,17 @@ crossorigin="anonymous"
                             Upload answer sheet
                         </span>
                     </a>
-                   
+                    
                 </li>
+                <!--li class="has-subnav">
+                    <a href="#">
+                       <i class="fa fa-tint fa-2x"></i>
+                        <span class="nav-text">
+                            Last donation date
+                        </span>
+                    </a>
+                   
+                </li-->
                 <!--li>
                     <a href="#">
                         <i class="fa fa-film fa-2x"></i>
@@ -163,7 +133,7 @@ crossorigin="anonymous"
                     </a>
                 </li-->
             </ul>
-
+            
             <ul class="logout">
                 <li>
                    <a href="{{url_for('auth.logout')}}">
@@ -174,9 +144,8 @@ crossorigin="anonymous"
                     </a>
                 </li>  
             </ul>
+            
         </nav>
-
-        
         
         <script
         src="https://code.jquery.com/jquery-3.2.1.slim.min.js"

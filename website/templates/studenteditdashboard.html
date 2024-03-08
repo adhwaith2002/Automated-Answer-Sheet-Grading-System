@@ -30,7 +30,7 @@ crossorigin="anonymous"
             <div class="form-group">
                 <label for="username">Name</label>
                 <input type="text" class="form-control" id="studentname"
-                    placeholder="Enter User Name" name="studentname" value="{{current_user.Studentname}}">
+                    placeholder="Enter User Name" name="studentname" value="{{current_user.name}}">
             </div>
             <div class="form-group">
                
@@ -52,9 +52,9 @@ crossorigin="anonymous"
             <select for="studentsex" class="form-control" name="studentsex" >
         <option value="{{current_user.sex}}" class="form-control" >{{current_user.sex}}  
         </option>  
-        <option value = "male" class="form-control"> Male   
+        <option value = "Male" class="form-control"> Male   
         </option>  
-        <option value = "female" class="form-control"> Female  
+        <option value = "Female" class="form-control"> Female  
         </option>  
         <option value = "others" class="form-control"> others
         </option>  
@@ -82,7 +82,7 @@ crossorigin="anonymous"
         <option value = "S8" class="form-control"> S8
         </option> 
     </div> 
-</select>  
+</select>  <br>
           <div class="form-group">
             <label for="department" >Department</label> 
             <select for="studentdepartment" class="form-control" name="studentdepartment" >
@@ -178,7 +178,7 @@ crossorigin="anonymous"
 
             <ul class="logout">
                 <li>
-                   <a href="{{url_for('auth.teacherlogout')}}">
+                   <a href="{{url_for('auth.logout')}}">
                          <i class="fa fa-power-off fa-2x"></i>
                         <span class="nav-text">
                             Logout

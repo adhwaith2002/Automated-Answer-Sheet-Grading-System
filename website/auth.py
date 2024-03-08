@@ -1,74 +1,44 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, login_required, logout_user ,current_user
-from website.models import Student, Teacher
+from website.models import Register
 from website import db
 
 auth = Blueprint('auth', __name__)
 
-@auth.route('/studentlogin', methods=['GET', 'POST'])
-def studentlogin():
+@auth.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
-        email = request.form.get('studentloginemail')
-        password = request.form.get('studentloginpassword')
+        email = request.form.get('loginemail')
+        password = request.form.get('loginpassword')
 
-        user = Student.query.filter_by(email=email).first()
+        user = Register.query.filter_by(email=email).first()
         if user:
-            if user.password == password:
+            if user.password == password and user.userrole == 0:
                 login_user(user, remember=True)
                 return redirect('studentdashboard')
-            else:
-                flash('Incorrect password', category='error')
-        else:
-            flash('Email does not exist', category='error')
-    return render_template("studentlogin.html")
-
-
-@auth.route('/teacherlogin', methods=['GET', 'POST'])
-def teacherlogin():
-    if request.method == 'POST':
-        email = request.form.get('teacherloginemail')
-        password = request.form.get('teacherloginpassword')
-
-        user = Teacher.query.filter_by(Email=email).first()
-        if user:
-            if user.password == password:
+            elif user.password == password and user.userrole == 1:
                 login_user(user, remember=True)
-            
                 return redirect('teacherdashboard')
-            else:
-                flash('Incorrect password', category='error')
-        else:
-            flash('Email does not exist', category='error')
-    return render_template("teacherlogin.html")
-
-@auth.route('/adminlogin', methods=['GET', 'POST'])
-def adminlogin():
-    if request.method == 'POST':
-        email = request.form.get('teacherloginemail')
-        password = request.form.get('teacherloginpassword')
-
-        user = Teacher.query.filter_by(Email=email).first()
-        if user:
-            if user.password == password:
+            elif user.password == password and user.userrole == 2:
                 login_user(user, remember=True)
-            
-                return redirect('teacherdashboard')
+                return redirect('admindashboard')
             else:
                 flash('Incorrect password', category='error')
         else:
             flash('Email does not exist', category='error')
-    return render_template("adminlogin.html")
+    return render_template("login.html")
 
 
-@auth.route('/studentlogout')
+
+
+
+
+
+@auth.route('/logout')
 @login_required
-def studentlogout():
+def logout():
     logout_user()
-    return redirect(url_for('auth.studentlogin'))
+    return redirect(url_for('auth.login'))
 
 
-@auth.route('/teacherlogout')
-@login_required
-def teacherlogout():
-    logout_user()
-    return redirect(url_for('auth.teacherlogin'))
+

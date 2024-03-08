@@ -21,7 +21,7 @@ def create_app():
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
 
-    from .models import Student, Teacher
+    from .models import Register
 
     create_database(app)
 
@@ -35,11 +35,7 @@ def create_app():
 
     def load_user(id):
     
-        user = Teacher.query.get(int(id))
-        if user:
-            return user
-    
-        user = Student.query.get(int(id))
+        user = Register.query.get(int(id))
         return user
 
     # @login_manager.user_loader

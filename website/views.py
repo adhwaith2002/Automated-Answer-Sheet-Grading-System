@@ -4,7 +4,7 @@ from flask import flash
 from flask_sqlalchemy import SQLAlchemy 
 from sqlalchemy import update
 import datetime
-from website.models import Student,Teacher
+from website.models import Register
 from website import db
 from flask_login import  login_required , current_user
 import google.generativeai as genai
@@ -84,19 +84,19 @@ def home():
 @login_required
 def teachereditdashboard():
     if request.method == 'POST':
-        teachername = request.form.get("teachername")
-        teacheremail = request.form.get("teacheremail")
-        teacherdob = request.form.get("teacherdob")
-        teacherdob1 = datetime.datetime.strptime(teacherdob, "%Y-%m-%d")
-        teachersex =request.form.get("teachersex")
-        teacherdepartment = request.form.get("teacherdepartment")
+        name = request.form.get("teachername")
+        email = request.form.get("teacheremail")
+        dob = request.form.get("teacherdob")
+        dob1 = datetime.datetime.strptime(dob, "%Y-%m-%d")
+        sex =request.form.get("teachersex")
+        department = request.form.get("teacherdepartment")
 
-        teacher = Teacher.query.filter_by(Email=teacheremail).first()
-        teacher.Teachername=teachername
-        teacher.Email=teacheremail
-        teacher.dob=teacherdob1
-        teacher.sex=teachersex
-        teacher.department =teacherdepartment
+        register = Register.query.filter_by(email=email).first()
+        register.name=name
+        register.email=email
+        register.dob=dob1
+        register.sex=sex
+        register.department =department
 
         db.session.commit() 
 
@@ -106,19 +106,23 @@ def teachereditdashboard():
 @login_required
 def studenteditdashboard():
     if request.method == 'POST':
-        teachername = request.form.get("teachername")
-        teacheremail = request.form.get("teacheremail")
-        teacherdob = request.form.get("teacherdob")
-        teacherdob1 = datetime.datetime.strptime(teacherdob, "%Y-%m-%d")
-        teachersex =request.form.get("teachersex")
-        teacherdepartment = request.form.get("teacherdepartment")
+        name = request.form.get("studentname")
+        regnumber = request.form.get("regnumber")
+        email = request.form.get("studentemail")
+        dob = request.form.get("studentdob")
+        dob1 = datetime.datetime.strptime(dob, "%Y-%m-%d")
+        sex =request.form.get("studentsex")
+        semester = request.form.get("semester")
+        department = request.form.get("studentdepartment")
 
-        teacher = Teacher.query.filter_by(Email=teacheremail).first()
-        teacher.Teachername=teachername
-        teacher.Email=teacheremail
-        teacher.dob=teacherdob1
-        teacher.sex=teachersex
-        teacher.department =teacherdepartment
+        register = Register.query.filter_by(email=email).first()
+        register.name=name
+        register.register_number = regnumber
+        register.email=email
+        register.dob=dob1
+        register.sex=sex
+        register.semester = semester
+        register.department =department
 
         db.session.commit() 
 
@@ -132,7 +136,7 @@ def studentdashboard():
 @views.route('/studentverification')
 @login_required
 def studentverification():
-    students = Student.query.filter_by(status = 0).all()
+    students = Register.query.filter_by(status = 0,userrole = 0).all()
     
     return render_template('studentverification.html',user=current_user,students = students)
 
@@ -215,7 +219,7 @@ def changeadminpassword():
         password1 = request.form.get("password1")
         if(password == password1):
             email = request.form.get("email")
-            blood = Student.query.filter_by(email=email).first()
+            blood = Register.query.filter_by(email=email).first()
             blood.password=password
             db.session.commit()
             flash('password updated successfully', category='sucess')
@@ -223,6 +227,13 @@ def changeadminpassword():
             flash('passwords don\'t match', category='error')
 
     return render_template('changeadminpassword.html',user=current_user)
+
+@views.route('/teacherverification')
+@login_required
+def teacherverification():
+    teachers = Register.query.filter_by(status = 0,userrole = 1).all()
+    
+    return render_template('studentverification.html',user=current_user,teachers = teachers)
 
 @views.route('/addadmin', methods=['GET','POST'])
 @login_required
@@ -262,7 +273,7 @@ def addadmin():
             flash('contact must conatain 10 characters',category='error')
         else:
             flash('Account created', category='sucess')
-            blood = Student(uname=uname,password=password,dob=dob2,sex=sex,bloodgroup=bloodgroup,address=address,city=city,email=email,contact=contact,userrole=1)
+            blood = Register(uname=uname,password=password,dob=dob2,sex=sex,bloodgroup=bloodgroup,address=address,city=city,email=email,contact=contact,userrole=1)
             db.session.add(blood)
             db.session.commit()
     return render_template('addadmin.html',user=current_user)
@@ -270,7 +281,7 @@ def addadmin():
 @views.route('/<int:id>/approvestudent',methods=['GET','POST'])
 @login_required
 def approvestudent(id):
-    student = Student.query.filter_by(id=id).first() 
+    student = Register.query.filter_by(id=id).first() 
     if request.method == 'POST':
         student.status= 1
         db.session.commit() 
@@ -278,24 +289,23 @@ def approvestudent(id):
 
     return render_template('approvestudent.html',student=student,user=current_user)
 
-@views.route('/<int:id>/deleteuser',methods=['GET','POST'])
+@views.route('/<int:id>/disapprovestudent',methods=['GET','POST'])
 @login_required
-def deleteuser(id):
-    donors = Student.query.filter_by(id=id).first()
+def disapprovestudent(id):
+    student = Register.query.filter_by(id=id).first()
     if request.method == 'POST':
-        if donors:
-            db.session.delete(donors)
+        if student:
+            db.session.delete(student)
             db.session.commit()
-            return redirect(url_for('views.admineditdashboard'))
+            return redirect(url_for('views.studentverification'))
         
-    return render_template('deleteuser.html',donors=donors ,user=current_user)
+    return render_template('disapprovestudent.html',student=student ,user=current_user)
 
 @views.route('/admineditdashboard')
 @login_required
 def admineditdashboard():
-    donors = Student.query.all()
-    donors.pop(1)
-    return render_template('admineditdashboard.html',donors=donors,user=current_user)
+    
+    return render_template('admineditdashboard.html',user=current_user)
 
 
 @views.route('/teacherchangepassword',methods=['GET','POST'])
@@ -306,7 +316,7 @@ def teacherchangepassword():
         teacherpassword1 = request.form.get("teacherpassword1")
         if(teacherpassword == teacherpassword1):
             email = request.form.get("email")
-            teacher = Teacher.query.filter_by(Email=email).first()
+            teacher = Register.query.filter_by(email=email).first()
             teacher.password=teacherpassword
             db.session.commit()
             flash('password updated successfully', category='sucess')
@@ -319,12 +329,12 @@ def teacherchangepassword():
 @login_required
 def studentchangepassword():
     if request.method == 'POST':
-        teacherpassword = request.form.get("teacherpassword")
-        teacherpassword1 = request.form.get("teacherpassword1")
-        if(teacherpassword == teacherpassword1):
+        studentpassword = request.form.get("studentpassword")
+        studentpassword1 = request.form.get("studentpassword1")
+        if(studentpassword == studentpassword1):
             email = request.form.get("email")
-            teacher = Teacher.query.filter_by(Email=email).first()
-            teacher.password=teacherpassword
+            student = Register.query.filter_by(email=email).first()
+            student.password=studentpassword
             db.session.commit()
             flash('password updated successfully', category='sucess')
         else:
@@ -338,7 +348,7 @@ def lastdonationdate(id):
     if request.method == 'POST':
         lastdonationdate = request.form.get("lastdonationdate")
         date = datetime.datetime.strptime(lastdonationdate, "%Y-%m-%d")
-        blood = Student.query.filter_by(id=id).first()
+        blood = Register.query.filter_by(id=id).first()
        
         blood.Lastdonationdate=date
         db.session.commit()
@@ -364,10 +374,10 @@ def studentregister():
         studentsemester = request.form.get("studentsemester")
         studentdepartment = request.form.get("studentdepartment")
         studentpassword = request.form.get("studentpassword")
-
-       
-        
-        if len(studentname) < 2:
+        student = Register.query.filter_by(email=studentemail).first()
+        if student:
+            flash('Email already exists.', category='error')
+        elif len(studentname) < 2:
             flash('Name  must be greater than 1 characters', category='error')
         elif len(studentpassword) < 8:
             flash('passwords must be atleast 8 characters', category='error')    
@@ -386,7 +396,7 @@ def studentregister():
             flash('email must be greater than 5 characters',category='error')                        
         else:
             flash('Account created', category='sucess')
-            student = Student(Studentname=studentname,email=studentemail,register_number=studentregisternumber,dob=studentdob,sex=studentgender,semester=studentsemester,department=studentdepartment,password=studentpassword,status=0)
+            student = Register(name=studentname,email=studentemail,register_number=studentregisternumber,dob=studentdob,sex=studentgender,semester=studentsemester,department=studentdepartment,password=studentpassword,status=0,userrole=0)
             db.session.add(student)
             db.session.commit()
             
@@ -403,8 +413,10 @@ def teacherregister():
         teachergender = request.form.get("teachergender")
         teacherdepartment = request.form.get("teacherdepartment")
         teacherpassword = request.form.get("teacherpassword")
-        
-        if len(teachername) < 2:
+        teacher = Register.query.filter_by(email=teacheremail).first()
+        if teacher:
+            flash('Email already exists.', category='error')
+        elif len(teachername) < 2:
             flash('Name  must be greater than 1 characters', category='error')
         elif len(teacheremail) < 2:
             flash('email must be greater than 5 characters',category='error')
@@ -418,7 +430,7 @@ def teacherregister():
             flash('password must be atleast 7 characters', category='error')    
         else:
             flash('Account created', category='sucess')
-            teacher = Teacher(Teachername=teachername,Email=teacheremail,dob=dob2,sex=teachergender,department=teacherdepartment,password=teacherpassword,status=0)
+            teacher = Register(name=teachername,email=teacheremail,dob=dob2,sex=teachergender,department=teacherdepartment,password=teacherpassword,status=0,userrole=1)
             db.session.add(teacher)
             db.session.commit()
             

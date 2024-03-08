@@ -26,7 +26,7 @@ crossorigin="anonymous"
     
     <div class="area">
        
-       <center> <h1>Welcome {{current_user.Studentname}} </h1><br>
+       <center> <h1>Welcome {{current_user.name}} </h1><br>
        
        
     </div><nav class="main-menu">
@@ -70,7 +70,7 @@ crossorigin="anonymous"
             
             <ul class="logout">
                 <li>
-                   <a href="{{url_for('auth.studentlogout')}}">
+                   <a href="{{url_for('auth.logout')}}">
                          <i class="fa fa-power-off fa-2x"></i>
                         <span class="nav-text">
                             Logout

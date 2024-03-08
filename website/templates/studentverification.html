@@ -32,7 +32,7 @@ crossorigin="anonymous"
           {% for student in students %}
           <tbody>
             <tr>
-              <td>{{student.Studentname}}</td>
+              <td>{{student.name}}</td>
               <td>
                 <span style="font-size: 24px;color:green;">
                     <a href="/{{student.id}}/approvestudent"><i class="fa fa-check" style="color: green"></i></a></span>
@@ -141,7 +141,7 @@ crossorigin="anonymous"
 
             <ul class="logout">
                 <li>
-                   <a href="{{url_for('auth.teacherlogout')}}">
+                   <a href="{{url_for('auth.logout')}}">
                          <i class="fa fa-power-off fa-2x"></i>
                         <span class="nav-text">
                             Logout
