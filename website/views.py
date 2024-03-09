@@ -215,12 +215,12 @@ def admindashboard():
 @login_required
 def changeadminpassword():
     if request.method == 'POST':
-        password = request.form.get("password")
-        password1 = request.form.get("password1")
+        password = request.form.get("adminpassword")
+        password1 = request.form.get("adminpassword1")
         if(password == password1):
             email = request.form.get("email")
-            blood = Register.query.filter_by(email=email).first()
-            blood.password=password
+            admin = Register.query.filter_by(email=email).first()
+            admin.password=password
             db.session.commit()
             flash('password updated successfully', category='sucess')
         else:
@@ -233,7 +233,7 @@ def changeadminpassword():
 def teacherverification():
     teachers = Register.query.filter_by(status = 0,userrole = 1).all()
     
-    return render_template('studentverification.html',user=current_user,teachers = teachers)
+    return render_template('teacherverification.html',user=current_user,teachers = teachers)
 
 @views.route('/addadmin', methods=['GET','POST'])
 @login_required
@@ -301,10 +301,41 @@ def disapprovestudent(id):
         
     return render_template('disapprovestudent.html',student=student ,user=current_user)
 
-@views.route('/admineditdashboard')
+@views.route('/<int:id>/approveteacher',methods=['GET','POST'])
+@login_required
+def approveteacher(id):
+    teacher = Register.query.filter_by(id=id).first() 
+    if request.method == 'POST':
+        teacher.status= 1
+        db.session.commit() 
+        return redirect(url_for('views.teacherverification'))
+
+    return render_template('approveteacher.html',teacher=teacher,user=current_user)
+
+@views.route('/<int:id>/disapproveteacher',methods=['GET','POST'])
+@login_required
+def disapproveteacher(id):
+    teacher = Register.query.filter_by(id=id).first()
+    if request.method == 'POST':
+        if teacher:
+            db.session.delete(teacher)
+            db.session.commit()
+            return redirect(url_for('views.teacherverification'))
+        
+    return render_template('disapproveteacher.html',teacher = teacher,user=current_user)
+
+@views.route('/admineditdashboard',methods=['GET','POST'])
 @login_required
 def admineditdashboard():
-    
+    if request.method == 'POST':
+        adminname = request.form.get("adminname")
+        adminemail = request.form.get("adminemail")
+        adminsex = request.form.get("adminsex")
+
+        register = Register.query.filter_by(email=adminemail).first()
+        register.name=adminname
+        register.sex=adminsex
+        db.session.commit() 
     return render_template('admineditdashboard.html',user=current_user)
 
 

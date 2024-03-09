@@ -17,16 +17,90 @@ crossorigin="anonymous"
     <title>Dashboard</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'style.css') }}">
     <style>
-        
-     
-    </style>   
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 6px;
+            margin-bottom: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>  
  
   </head>
   <body>
     
     <div class="area">
        
-       <center> <h1>Welcome {{current_user.name}} </h1><br>
+        <div class="area">
+        
+            <div class="container">
+                <div class="container">
+                    <div class="container">
+                
+            <form action = '/admineditdashboard' method= 'POST'>
+                <div class="form-group">
+                    <label for="username">Name</label>
+                    <input type="text" class="form-control" id="adminname"
+                        placeholder="Enter User Name" name="adminname" value="{{current_user.name}}">
+                </div>
+                <div class="form-group">
+                   
+                    <input type="email" class="form-control" id="adminemail"
+                        placeholder = "Enter the Email" name="adminemail" value="{{current_user.email}}" hidden> 
+                </div>
+                
+             
+                <div class="form-group">
+                <label for="sex" >Sex</label> 
+                <select for="adminsex" class="form-control" name="adminsex" >
+            <option value="{{current_user.sex}}" class="form-control" >{{current_user.sex}}  
+            </option>  
+            <option value = "Male" class="form-control"> Male   
+            </option>  
+            <option value = "Female" class="form-control"> Female  
+            </option>  
+            <option value = "others" class="form-control"> others
+            </option>  
+        </select>    
+        </div> 
+            
+    </select> 
+            <button type="submit" class="btn bg-success">
+                    Update
+                </button>
+            </form>
+            </div>
+
+            
+           
+        </div>
     
        
     </div><nav class="main-menu">
@@ -71,7 +145,7 @@ crossorigin="anonymous"
                 </li>
                 <li class="has-subnav">
                     <a href="{{url_for('views.addadmin')}}">
-                       <i class="fa fa-upload fa-2x"></i>
+                       <i class="fa fa-user-plus fa2x"></i>
                         <span class="nav-text">
                             Add Admin
                         </span>

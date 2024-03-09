@@ -26,31 +26,20 @@ crossorigin="anonymous"
     
     <div class="area">
        
-        <div class="table-responsive mx-auto" style="max-width: 70%;">
-            <table class="table table-striped ">
-               <thead>
-                   <tr>
-                     <th scope="col">Teacher Name</th>
-                     <th scope ="col">Actions</th>
-                     
-                 </tr>
-                 </thead>
-               
-                 {% for teacher in teachers %}
-                 <tbody>
-                   <tr>
-                     <td>{{teacher.name}}</td>
-                     <td>
-                       <span style="font-size: 24px;color:green;">
-                           <a href="/{{teacher.id}}/approveteacher"><i class="fa fa-check" style="color: green"></i></a></span>
-                           |
-                           <span style="font-size: 24px;color:red;">
-                               <a href="/{{teacher.id}}/disapproveteacher"><i class="fa fa-times" style="color: red"></i></a></span>
-                   </td>
-               </div>
-                   </tr>
-                   </tbody>
-               {% endfor %}
+        <div class="area">
+            <div class="container d-flex justify-content-center">
+                <div class="card" style="width: 18rem; margin-top: 20px;">
+                    <div class="card-body">
+                        <h5 class="card-title">Approve Teacher</h5>
+                        <p class="card-text">Click yes to Approve</p>
+                        <form action="/{{teacher.id}}/approveteacher" method="post">
+                            <input type="submit" value="YES" class="btn btn-success">
+                            <a href="{{url_for('views.teacherverification')}}" class="btn btn-warning">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     
        
     </div><nav class="main-menu">
@@ -85,7 +74,7 @@ crossorigin="anonymous"
                     
                 </li>
                 <li class="has-subnav">
-                    <a href="#">
+                    <a href="{{url_for('views.teacherverification')}}">
                        <i class="fa fa-user fa-2x"></i>
                         <span class="nav-text">
                             Teacher Verification

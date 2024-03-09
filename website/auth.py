@@ -14,11 +14,17 @@ def login():
         user = Register.query.filter_by(email=email).first()
         if user:
             if user.password == password and user.userrole == 0:
-                login_user(user, remember=True)
-                return redirect('studentdashboard')
+                if user.status == 1:
+                    login_user(user, remember=True)
+                    return redirect('studentdashboard')
+                else:
+                    flash("Student not verified!!!!!", category='error')
             elif user.password == password and user.userrole == 1:
-                login_user(user, remember=True)
-                return redirect('teacherdashboard')
+                if user.status == 1:
+                    login_user(user, remember=True)
+                    return redirect('teacherdashboard')
+                else:
+                    flash("Teacher not verified!!!!!", category='error')
             elif user.password == password and user.userrole == 2:
                 login_user(user, remember=True)
                 return redirect('admindashboard')
