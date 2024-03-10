@@ -145,9 +145,10 @@ def studentverification():
 def teacherdashboard():
     return render_template('teacherdashboard.html',user=current_user)
 
-@views.route('/uploadanswersheet')
+@views.route('/uploadanswersheet',methods = ['GET','POST'])
 @login_required
 def uploadanswersheet():
+    output_parts = []
     if request.method == 'POST':
 
         # Check if the post request has the file part
@@ -202,7 +203,10 @@ def uploadanswersheet():
                     for candidate in candidates:
                         content_parts = candidate.content.parts
                         for part in content_parts:
-                            flash(part.text)
+                            #flash(part.text)
+                            output_parts.append(part.text)
+                    output_text = ' '.join(output_parts) 
+                    print(output_text) 
             return redirect(url_for('views.uploadanswersheet'))
     return render_template('uploadanswersheet.html',user=current_user)
 
