@@ -15,8 +15,49 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 from pdf2image import convert_from_path
 import fitz
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
 
 views = Blueprint('views',__name__)
+
+
+
+def preprocess_text(text):
+    stop_words = set(stopwords.words('english'))
+    tokens = word_tokenize(text.lower())
+    filtered_tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
+    return " ".join(filtered_tokens)
+
+def calculate_similarity(answer, keypoints):
+    answer = preprocess_text(answer)
+    keypoints = [preprocess_text(kp) for kp in keypoints]
+
+    # Create TF-IDF vectors
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform([answer] + keypoints)
+
+    # Calculate cosine similarity
+    similarities = cosine_similarity(vectors[0], vectors[1:]).flatten()
+    matched_keypoints = set()
+    total_score = 0
+    # Calculate scores
+    for similarity, keypoint in zip(similarities, keypoints):
+        # Only consider key points that haven't been matched yet
+        if keypoint not in matched_keypoints:
+            total_score += similarity  # Add similarity score to total score
+            matched_keypoints.add(keypoint)  # Add key point to matched set
+
+    # Calculate scores
+    total_points = len(matched_keypoints)
+    marks_per_point = 12 / total_points if total_points != 0 else 0  # Avoid division by zero
+    score = total_score * marks_per_point
+
+    return min(score,1)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -25,8 +66,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 image_path = os.path.join(os.getcwd(), 'answer.jpeg')
 
-genai.configure(api_key="AIzaSyDMkylfV_O9Tpd7cELHZ_G4hx3dMg3A4tU")
+genai.configure(api_key="AIzaSyDMkylfV_O9Tpd7cELHZ_G4hx3dMg3A4tU",transport='rest')
 model = genai.GenerativeModel('gemini-pro-vision')
+model1 = genai.GenerativeModel('gemini-pro')
 def get_file_extension(filename):
     return os.path.splitext(filename)[1].lower()
 def allowed_file(filename):
@@ -149,8 +191,10 @@ def teacherdashboard():
 @login_required
 def uploadanswersheet():
     output_parts = []
+    keypoints =[]
     if request.method == 'POST':
-
+        keypoints = request.form.getlist("keypoints")
+        
         # Check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
@@ -203,11 +247,18 @@ def uploadanswersheet():
                     for candidate in candidates:
                         content_parts = candidate.content.parts
                         for part in content_parts:
-                            #flash(part.text)
+                            
                             output_parts.append(part.text)
                     output_text = ' '.join(output_parts) 
-                    print(output_text) 
+                     
+                    score = calculate_similarity(output_text,keypoints)
+            print(output_text)
+            # print("Score: {}".format(score))
+            mark = score * 12
+            print("Mark:", mark)
+                
             return redirect(url_for('views.uploadanswersheet'))
+        
     return render_template('uploadanswersheet.html',user=current_user)
 
 @views.route('/admindashboard')
