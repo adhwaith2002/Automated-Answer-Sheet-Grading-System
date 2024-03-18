@@ -4,7 +4,7 @@ from flask import flash
 from flask_sqlalchemy import SQLAlchemy 
 from sqlalchemy import update
 import datetime
-from website.models import Register
+from website.models import Register,Mark
 from website import db
 from flask_login import  login_required , current_user
 import google.generativeai as genai
@@ -19,6 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+import re
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -66,7 +67,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 image_path = os.path.join(os.getcwd(), 'answer.jpeg')
 
-genai.configure(api_key="AIzaSyDMkylfV_O9Tpd7cELHZ_G4hx3dMg3A4tU",transport='rest')
+genai.configure(api_key="AIzaSyDGYY30nERgnnAV5L6z38EW5G7dJc8QBkI",transport='rest')
 model = genai.GenerativeModel('gemini-pro-vision')
 model1 = genai.GenerativeModel('gemini-pro')
 def get_file_extension(filename):
@@ -191,20 +192,22 @@ def teacherdashboard():
 @login_required
 def uploadanswersheet():
     output_parts = []
-    keypoints =[]
+    keypoint =[]
+    
     if request.method == 'POST':
-        keypoints = request.form.getlist("keypoints")
-        
+        keypoint = request.form.getlist("keypoints")
+        email = request.form.get("email")
+        subject = request.form.get("subject")
         # Check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
+            flash('No file part',category='error')
             return redirect(request.url)
 
         file = request.files['file']
 
         # If the user does not select a file, the browser submits an empty file without a filename
         if file.filename == '':
-            flash('No selected file')
+            flash('No selected file',category='error')
             return redirect(request.url)
 
         # If the file is allowed and has a valid extension
@@ -225,7 +228,7 @@ def uploadanswersheet():
                 os.remove(filepath)
 
             file.save(filepath)
-            flash ("uploaded sucessfully")
+            flash ("uploaded sucessfully",category='success')
 
             pdf_filename = "AnswerSheet.pdf"
             pdf_path = os.path.join(UPLOAD_FOLDER, pdf_filename)
@@ -233,9 +236,9 @@ def uploadanswersheet():
             if os.path.exists(pdf_path):
                 success = convert_pdf_to_jpg(pdf_path, output_folder)
             if success:
-                flash("PDF converted to JPG successfully.")
+                flash("PDF converted to JPG successfully.",category='success')
             else:
-                flash("Error converting PDF to JPG. Please check the logs for details.")
+                flash("Error converting PDF to JPG. Please check the logs for details.",category='error')
             
             converted_folder = os.path.join(os.getcwd(), 'converted')
             for filename in os.listdir(converted_folder):
@@ -250,13 +253,46 @@ def uploadanswersheet():
                             
                             output_parts.append(part.text)
                     output_text = ' '.join(output_parts) 
+                    safety_settings = [
+    {
+        "category": "HARM_CATEGORY_DANGEROUS",
+        "threshold": "BLOCK_NONE",
+    },
+    {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "threshold": "BLOCK_NONE",
+    },
+    {
+        "category": "HARM_CATEGORY_HATE_SPEECH",
+        "threshold": "BLOCK_NONE",
+    },
+    {
+        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        "threshold": "BLOCK_NONE",
+    },
+    {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "threshold": "BLOCK_NONE",
+    },
+]
                      
-                    score = calculate_similarity(output_text,keypoints)
-            print(output_text)
-            # print("Score: {}".format(score))
-            mark = score * 12
-            print("Mark:", mark)
-                
+                    prompt = f"""
+                                give me mark out of 12 depending upon whether this keypoint present in the output_text. if any point missing reduce mark accordingly.Mark for each point 
+                                is determined by dividing the total mark by number of keypoint.Then evaluvate as foresaid carefully and accurately.Also give me the response as a number indicating mark nothing else required."(return mark as an integer type,so as to store in database)"
+                                output_text: {output_text}
+                                keypoint: {keypoint}
+                            """
+            response = model1.generate_content(prompt,safety_settings=safety_settings)
+            
+            # content = response.candidates[0].content.parts[0].content
+            mark = response.text
+            # text = content.text
+            # mark_res = re.findall(r'\d+', text)[0]
+            # mark = int(mark_res)
+           
+            student = Mark(email=email,subject=subject,mark=mark)
+            db.session.add(student)
+            db.session.commit()
             return redirect(url_for('views.uploadanswersheet'))
         
     return render_template('uploadanswersheet.html',user=current_user)
@@ -294,42 +330,32 @@ def teacherverification():
 @login_required
 def addadmin():
     if request.method == 'POST':
-        uname = request.form.get("uname")
+        name = request.form.get("name")
         password = request.form.get("password")
-        password1 = request.form.get("password1")
-        dob1 = request.form.get("dob")
-        dob2 = datetime.datetime.strptime(dob1, "%Y-%m-%d")
         sex = request.form.get("sex")
-        bloodgroup = request.form.get("bloodgroup")
-        address = request.form.get("address")
-        city = request.form.get("city")
         email = request.form.get("email")
-        contact = request.form.get("contact")
+        existing_user = Register.query.filter_by(email=email, userrole=2).first()
+        existing_student = Register.query.filter_by(email=email, userrole=0).first()
+        existing_teacher = Register.query.filter_by(email=email, userrole=1).first()
 
-        if len(uname) < 2:
+        if len(name) < 2:
             flash('Name  must be greater than 1 characters', category='error')
-        elif len(password1) < 7:
+        elif existing_user or existing_student or existing_teacher:
+            flash('Email address already exists. Please choose a different email.')
+        elif len(password) < 7:
             flash('passwords must be atleast 7 characters', category='error')    
-        elif password != password1:
-            flash('passwords don\'t match', category='error')
-        elif (dob1 == NULL ): 
-            flash('dob must be filled', category='error')    
+        # elif password != password1:
+        #     flash('passwords don\'t match', category='error') 
         elif (sex == "Select"): 
             flash('sex must be filled', category='error')
-        elif (bloodgroup == "Select"): 
-            flash('bloodgroup must be filled' , category ='error') 
-        elif (address == NULL): 
-            flash('address must be filled' , category='error')  
-        elif (city == NULL): 
-            flash('city must be filled' ,category='error') 
+        
         elif len(email) < 2:
             flash('email must be greater than 5 characters',category='error')                        
-        elif len(contact) != 10:
-            flash('contact must conatain 10 characters',category='error')
+     
         else:
             flash('Account created', category='sucess')
-            blood = Register(uname=uname,password=password,dob=dob2,sex=sex,bloodgroup=bloodgroup,address=address,city=city,email=email,contact=contact,userrole=1)
-            db.session.add(blood)
+            admine = Register(name=name,password=password,sex=sex,email=email,userrole=2)
+            db.session.add(admine)
             db.session.commit()
     return render_template('addadmin.html',user=current_user)
 
@@ -428,24 +454,13 @@ def studentchangepassword():
 
     return render_template('studentchangepassword.html',user=current_user)
 
-@views.route('/<int:id>/lastdonationdate',methods=['GET','POST'])
+@views.route('/studentviewmark')
 @login_required
-def lastdonationdate(id):
-    if request.method == 'POST':
-        lastdonationdate = request.form.get("lastdonationdate")
-        date = datetime.datetime.strptime(lastdonationdate, "%Y-%m-%d")
-        blood = Register.query.filter_by(id=id).first()
-       
-        blood.Lastdonationdate=date
-        db.session.commit()
-        flash('Last donation date updated sucessfully',category='sucess') 
-        
-    return render_template('lastdonationdate.html',user=current_user)
+def studentviewmark():
 
-@views.route('/uploadhealthcertificate')
-@login_required
-def uploadhealthcertificate():
-    return render_template('uploadhealthcertificate.html',user=current_user)
+    return render_template('studentviewmark.html',user=current_user)
+
+
 
 
 @views.route('/studentregister',methods=['GET','POST'])

@@ -19,8 +19,11 @@ class Register(db.Model,UserMixin):
     status = db.Column(db.Integer)
     userrole =db.Column(db.Integer)
 
-
-
+class Mark(db.Model,UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200),nullable=False)
+    subject = db.Column(db.String(200))
+    mark = db.Column(db.Integer)
 
     
 
